@@ -1,0 +1,70 @@
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Next.js Build ---
+.next/
+out/
+build/
+.turbo/
+
+# --- Environment Files ---
+.env
+.env*.local
+.env.local
+.env.production
+.env.development
+
+# --- Debug Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+logs/
+
+# --- OS Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+~$*
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.history/
+
+# --- TypeScript ---
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Prisma ---
+prisma/migrations/
+
+# --- Test Coverage ---
+coverage/
+.nyc_output/
+
+# --- Misc ---
+*.pem
+*.cert
+*.key
+.env.keys
+.env.*.enc
+
+# --- Docker ---
+.docker/
+docker-compose.override.yml
+
+# --- Sentry / Error Tracking ---
+.sentryclirc
