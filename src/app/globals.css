@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg-primary: oklch(0.99 0.01 265);
+    --color-bg-secondary: oklch(0.97 0.01 265);
+    --color-surface: oklch(1 0 0);
+    --color-surface-hover: oklch(0.96 0.01 265);
+    --color-border: oklch(0.9 0.01 265);
+    --color-border-focus: oklch(0.55 0.25 265);
+    --color-text-primary: oklch(0.15 0.02 265);
+    --color-text-secondary: oklch(0.5 0.02 265);
+    --color-text-muted: oklch(0.65 0.02 265);
+    --color-accent: oklch(0.55 0.25 265);
+    --color-accent-hover: oklch(0.5 0.25 265);
+    --color-accent-light: oklch(0.92 0.05 265);
+    --color-success: oklch(0.6 0.2 150);
+    --color-success-light: oklch(0.92 0.05 150);
+    --color-warning: oklch(0.7 0.2 75);
+    --color-warning-light: oklch(0.95 0.05 75);
+    --color-danger: oklch(0.6 0.2 25);
+    --color-danger-light: oklch(0.92 0.05 25);
+    --color-info: oklch(0.65 0.15 195);
+    --color-info-light: oklch(0.92 0.05 195);
+    --color-priority-high: oklch(0.6 0.2 25);
+    --color-priority-high-bg: oklch(0.95 0.05 25);
+    --color-priority-medium: oklch(0.7 0.2 75);
+    --color-priority-medium-bg: oklch(0.96 0.05 75);
+    --color-priority-low: oklch(0.65 0.15 195);
+    --color-priority-low-bg: oklch(0.94 0.05 195);
+    --color-category-work: oklch(0.55 0.2 265);
+    --color-category-work-bg: oklch(0.92 0.05 265);
+    --color-category-personal: oklch(0.6 0.2 330);
+    --color-category-personal-bg: oklch(0.93 0.05 330);
+    --color-category-studies: oklch(0.6 0.2 150);
+    --color-category-studies-bg: oklch(0.92 0.05 150);
+    --color-category-health: oklch(0.7 0.2 75);
+    --color-category-health-bg: oklch(0.95 0.05 75);
+    --color-category-other: oklch(0.65 0.15 195);
+    --color-category-other-bg: oklch(0.94 0.05 195);
+    --shadow-card: 0 1px 3px 0 oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06);
+    --shadow-dropdown: 0 4px 6px -1px oklch(0 0 0 / 0.08), 0 2px 4px -2px oklch(0 0 0 / 0.05);
+    --shadow-modal: 0 20px 25px -5px oklch(0 0 0 / 0.12), 0 8px 10px -6px oklch(0 0 0 / 0.06);
+  }
+
+  .dark {
+    --color-bg-primary: oklch(0.12 0.01 265);
+    --color-bg-secondary: oklch(0.14 0.01 265);
+    --color-surface: oklch(0.16 0.02 265);
+    --color-surface-hover: oklch(0.2 0.02 265);
+    --color-border: oklch(0.25 0.02 265);
+    --color-border-focus: oklch(0.6 0.25 265);
+    --color-text-primary: oklch(0.95 0.01 265);
+    --color-text-secondary: oklch(0.7 0.01 265);
+    --color-text-muted: oklch(0.5 0.01 265);
+    --color-accent: oklch(0.6 0.2 265);
+    --color-accent-hover: oklch(0.55 0.2 265);
+    --color-accent-light: oklch(0.2 0.05 265);
+    --color-success: oklch(0.65 0.2 150);
+    --color-success-light: oklch(0.2 0.05 150);
+    --color-warning: oklch(0.75 0.2 75);
+    --color-warning-light: oklch(0.25 0.05 75);
+    --color-danger: oklch(0.65 0.2 25);
+    --color-danger-light: oklch(0.22 0.05 25);
+    --color-info: oklch(0.7 0.15 195);
+    --color-info-light: oklch(0.2 0.05 195);
+  }
+
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 3px;
+  }
+}
