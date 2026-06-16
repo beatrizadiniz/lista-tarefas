@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  completed   Boolean   @default(false)
+  priority    Priority  @default(MEDIUM)
+  dueDate     DateTime?
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  tags        Tag[]
+
+  @@index([completed])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([categoryId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   // HSL string for custom colors
+  icon      String?  // Lucide icon name
+  order     Int      @default(0)
+  tasks     Task[]
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String // HSL string
+  tasks Task[]
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
