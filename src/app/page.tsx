@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
 import { useTodos } from "@/features/todo/hooks/useTodos";
 import { TodoForm } from "@/components/todo/TodoForm";
 import { TodoList } from "@/components/todo/TodoList";
@@ -8,6 +12,16 @@ import { TodoStats } from "@/components/todo/TodoStats";
 import { CategoryManager } from "@/components/todo/CategoryManager";
 
 export default function TodoPage() {
+  const router = useRouter();
+  
+  // Redirect unauthenticated users to login page
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace("/login");
+      }
+    });
+  }, [router]);
   const {
     tasks,
     categories,
