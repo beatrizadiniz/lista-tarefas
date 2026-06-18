@@ -12,37 +12,48 @@ interface TodoListProps {
   onEdit: (id: string) => void;
 }
 
+const emptyMessages: Record<FilterType, { title: string; description: string; emoji: string }> = {
+  ALL: {
+    title: "Nenhuma tarefa ainda",
+    description: "Clique em \"Adicionar nova tarefa\" para começar",
+    emoji: "✨",
+  },
+  PENDING: {
+    title: "Nenhuma tarefa pendente",
+    description: "Você está em dia com tudo! Parabéns 🎉",
+    emoji: "🎯",
+  },
+  COMPLETED: {
+    title: "Nenhuma tarefa concluída",
+    description: "Marque tarefas como concluídas para vê-las aqui",
+    emoji: "☑️",
+  },
+};
+
 export function TodoList({ tasks, categories, filter, onToggle, onDelete, onEdit }: TodoListProps) {
   if (tasks.length === 0) {
-    const emptyMessages: Record<FilterType, { title: string; description: string }> = {
-      ALL: {
-        title: "Nenhuma tarefa encontrada",
-        description: "Clique em \"Nova Tarefa\" para começar",
-      },
-      PENDING: {
-        title: "Nenhuma tarefa pendente",
-        description: "Todas as tarefas foram concluídas! 🎉",
-      },
-      COMPLETED: {
-        title: "Nenhuma tarefa concluída",
-        description: "Marque tarefas como concluídas para vê-las aqui",
-      },
-    };
-
     const msg = emptyMessages[filter];
 
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="w-16 h-16 rounded-full bg-[var(--color-bg-secondary)] flex items-center justify-center mb-4">
-          <svg className="h-8 w-8 text-[var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-          </svg>
+      <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+        {/* Illustrated empty state */}
+        <div className="relative mb-6">
+          <div className="w-20 h-20 rounded-[var(--radius-xl)] flex items-center justify-center text-4xl shadow-[var(--shadow-card)]"
+            style={{ background: "var(--gradient-surface)", border: "1px solid var(--color-border)" }}
+          >
+            {msg.emoji}
+          </div>
+          {/* Decorative dots */}
+          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full opacity-60"
+            style={{ background: "var(--gradient-accent)" }} />
+          <div className="absolute -bottom-1 -left-1 w-3 h-3 rounded-full opacity-40"
+            style={{ background: "var(--gradient-accent)" }} />
         </div>
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] mb-1">
+
+        <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-2">
           {msg.title}
         </h3>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <p className="text-sm text-[var(--color-text-muted)] max-w-xs leading-relaxed">
           {msg.description}
         </p>
       </div>
@@ -51,15 +62,20 @@ export function TodoList({ tasks, categories, filter, onToggle, onDelete, onEdit
 
   return (
     <div className="space-y-2">
-      {tasks.map((task) => (
-        <TodoItem
+      {tasks.map((task, i) => (
+        <div
           key={task.id}
-          task={task}
-          category={categories.find((c) => c.id === task.categoryId)}
-          onToggle={onToggle}
-          onDelete={onDelete}
-          onEdit={onEdit}
-        />
+          className="animate-fadeInUp"
+          style={{ animationDelay: `${i * 30}ms` }}
+        >
+          <TodoItem
+            task={task}
+            category={categories.find((c) => c.id === task.categoryId)}
+            onToggle={onToggle}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
+        </div>
       ))}
     </div>
   );

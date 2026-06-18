@@ -46,37 +46,34 @@ export function TodoForm({ categories, onSubmit }: TodoFormProps) {
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} className="w-full" size="lg">
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
-        </svg>
-        Nova Tarefa
-      </Button>
+      <button
+        onClick={() => setOpen(true)}
+        className="group w-full flex items-center gap-3 h-14 px-5 rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] font-medium text-sm transition-all duration-200 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-light)] hover:shadow-[var(--glow-accent-sm)]"
+      >
+        <span className="flex items-center justify-center w-7 h-7 rounded-[var(--radius-md)] border border-current transition-all duration-200 group-hover:scale-110">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+        </span>
+        Adicionar nova tarefa...
+      </button>
     );
   }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 space-y-3"
+      className="rounded-[var(--radius-xl)] border border-[var(--color-border-focus)] bg-[var(--color-surface)] p-5 space-y-4 shadow-[var(--shadow-dropdown),var(--glow-accent-sm)] animate-slideDown"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+        <h3 className="text-base font-bold text-[var(--color-text-primary)]">
           Nova Tarefa
         </h3>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="p-1 rounded-[var(--radius-sm)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+          className="p-1.5 rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)] transition-all"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18" /><path d="m6 6 12 12" />
@@ -89,6 +86,7 @@ export function TodoForm({ categories, onSubmit }: TodoFormProps) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         autoFocus
+        className="text-base font-medium"
       />
 
       <Input
@@ -115,7 +113,7 @@ export function TodoForm({ categories, onSubmit }: TodoFormProps) {
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full h-10 px-3 rounded-[var(--radius-md)] bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-focus)] focus:ring-1 focus:ring-[var(--color-border-focus)]"
+            className="w-full h-10 px-3 rounded-[var(--radius-md)] bg-[var(--color-bg-secondary)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-focus)] focus:shadow-[var(--glow-accent-sm)] transition-all"
           />
         </div>
       </div>
@@ -134,8 +132,8 @@ export function TodoForm({ categories, onSubmit }: TodoFormProps) {
       )}
 
       <div className="flex gap-2 pt-1">
-        <Button type="submit" disabled={!title.trim()}>
-          Adicionar
+        <Button type="submit" disabled={!title.trim()} className="flex-1">
+          Adicionar Tarefa
         </Button>
         <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
           Cancelar

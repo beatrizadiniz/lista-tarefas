@@ -6,6 +6,7 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 
 const navItems = [
   {
@@ -47,20 +48,36 @@ export function Navbar() {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const router = useRouter();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+  }, []);
+
+  const initials = userEmail
+    ? userEmail.slice(0, 2).toUpperCase()
+    : "??";
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 w-full border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-xl">
       <div className="mx-auto max-w-5xl px-4">
         <div className="flex h-14 items-center justify-between">
+
+          {/* Left: logo + nav */}
           <div className="flex items-center gap-1">
             <Link href="/" className="flex items-center gap-2 mr-4">
-              <span className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-md)] bg-[var(--color-accent)] text-white">
+              <span
+                className="flex items-center justify-center w-8 h-8 rounded-[var(--radius-md)] text-white shadow-[var(--glow-accent-sm)]"
+                style={{ background: "var(--gradient-accent)" }}
+              >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 11l3 3L22 4" />
                   <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
               </span>
-              <span className="font-semibold text-sm text-[var(--color-text-primary)] hidden sm:inline">
+              <span className="font-bold text-sm text-[var(--color-text-primary)] hidden sm:inline">
                 Todo App
               </span>
             </Link>
@@ -75,7 +92,7 @@ export function Navbar() {
                     className={cn(
                       "flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-md)] text-sm font-medium transition-all duration-150",
                       isActive
-                        ? "bg-[var(--color-accent-light)] text-[var(--color-accent)]"
+                        ? "text-[var(--color-accent)] bg-[var(--color-accent-light)]"
                         : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]"
                     )}
                   >
@@ -87,6 +104,7 @@ export function Navbar() {
             </nav>
           </div>
 
+          {/* Right: theme toggle + user avatar + logout */}
           <div className="flex items-center gap-1">
             <button
               onClick={toggle}
@@ -100,24 +118,29 @@ export function Navbar() {
               ) : (
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2" />
-                  <path d="M12 20v2" />
-                  <path d="m4.93 4.93 1.41 1.41" />
-                  <path d="m17.66 17.66 1.41 1.41" />
-                  <path d="M2 12h2" />
-                  <path d="M20 12h2" />
-                  <path d="m6.34 17.66-1.41 1.41" />
-                  <path d="m19.07 4.93-1.41 1.41" />
+                  <path d="M12 2v2M12 20v2m-7.07-14.07 1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2m-4.93-7.07-1.41 1.41M6.34 17.66l-1.41 1.41" />
                 </svg>
               )}
             </button>
+
+            {/* User avatar */}
+            {userEmail && (
+              <div
+                className="flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-bold shadow-[var(--glow-accent-sm)]"
+                style={{ background: "var(--gradient-accent)" }}
+                title={userEmail}
+              >
+                {initials}
+              </div>
+            )}
 
             <button
               onClick={async () => {
                 await supabase.auth.signOut();
                 router.push("/login");
               }}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)] transition-all"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-[var(--radius-md)] text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] transition-all"
+              title="Sair"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -127,6 +150,7 @@ export function Navbar() {
               <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
+
         </div>
       </div>
     </header>

@@ -13,19 +13,26 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", loading, disabled, children, ...props }, ref) => {
     const variants = {
       primary:
-        "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] active:scale-[0.98]",
+        "text-white font-semibold " +
+        "bg-[image:var(--gradient-accent)] " +
+        "hover:opacity-90 hover:shadow-[var(--glow-accent-sm)] " +
+        "active:scale-[0.97] active:opacity-100",
       secondary:
-        "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)]",
+        "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] " +
+        "hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] " +
+        "hover:border-[var(--color-border-focus)]",
       ghost:
-        "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]",
+        "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] " +
+        "hover:text-[var(--color-text-primary)]",
       danger:
-        "bg-[var(--color-danger-light)] text-[var(--color-danger)] hover:opacity-80",
+        "bg-[var(--color-danger-light)] text-[var(--color-danger)] " +
+        "hover:opacity-80 hover:shadow-[var(--glow-danger)]",
     };
 
     const sizes = {
-      sm: "h-8 px-3 text-xs gap-1.5",
-      md: "h-10 px-4 text-sm gap-2",
-      lg: "h-12 px-6 text-base gap-2.5",
+      sm: "h-8 px-3 text-xs gap-1.5 rounded-[var(--radius-md)]",
+      md: "h-10 px-4 text-sm gap-2 rounded-[var(--radius-md)]",
+      lg: "h-12 px-6 text-base gap-2.5 rounded-[var(--radius-lg)]",
     };
 
     return (
@@ -33,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center rounded-[var(--radius-md)] font-medium transition-all duration-150",
+          "inline-flex items-center justify-center font-medium transition-all",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
           "disabled:opacity-50 disabled:pointer-events-none",
           variants[variant],
