@@ -5,6 +5,7 @@ export interface Category {
   name: string;
   color: string;
   icon?: string;
+  userId?: string;
 }
 
 export interface Task {
@@ -18,6 +19,7 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  userId?: string;
 }
 
 export type FilterType = "ALL" | "PENDING" | "COMPLETED";

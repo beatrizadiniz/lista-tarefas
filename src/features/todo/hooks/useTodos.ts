@@ -31,97 +31,122 @@ export function useTodos(): UseTodosReturn {
   const [filter, setFilter] = useState<FilterType>("ALL");
   const [search, setSearchState] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Carregar dados iniciais do Supabase
-  useEffect(() => {
-    async function initData() {
-      try {
-        // Buscar categorias
-        let { data: fetchedCategories, error: catError } = await supabase
+  // Carregar dados do Supabase
+  const loadData = useCallback(async (currentUserId: string) => {
+    setIsLoading(true);
+    try {
+      // Buscar categorias do usuário logado
+      let { data: fetchedCategories, error: catError } = await supabase
+        .from("Category")
+        .select("*")
+        .eq("userId", currentUserId)
+        .order("order", { ascending: true });
+
+      if (catError) throw catError;
+
+      if (!fetchedCategories || fetchedCategories.length === 0) {
+        const defaultCats = getDefaultCategories();
+        const { data: insertedCats, error: insertCatError } = await supabase
           .from("Category")
-          .select("*")
-          .order("order", { ascending: true });
+          .insert(defaultCats.map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            color: cat.color,
+            icon: cat.icon || null,
+            userId: currentUserId
+          })))
+          .select();
 
-        if (catError) throw catError;
+        if (insertCatError) throw insertCatError;
+        fetchedCategories = insertedCats;
+      }
 
-        if (!fetchedCategories || fetchedCategories.length === 0) {
-          const defaultCats = getDefaultCategories();
-          const { data: insertedCats, error: insertCatError } = await supabase
-            .from("Category")
-            .insert(defaultCats.map(cat => ({
-              id: cat.id,
-              name: cat.name,
-              color: cat.color,
-              icon: cat.icon || null
-            })))
-            .select();
+      const formattedCategories: Category[] = (fetchedCategories || []).map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        color: cat.color,
+        icon: cat.icon || undefined,
+        userId: cat.userId
+      }));
 
-          if (insertCatError) throw insertCatError;
-          fetchedCategories = insertedCats;
-        }
+      setCategories(formattedCategories);
 
-        const formattedCategories: Category[] = (fetchedCategories || []).map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          color: cat.color,
-          icon: cat.icon || undefined
-        }));
+      // Buscar tarefas do usuário logado
+      let { data: fetchedTasks, error: taskError } = await supabase
+        .from("Task")
+        .select("*")
+        .eq("userId", currentUserId)
+        .order("order", { ascending: true });
 
-        setCategories(formattedCategories);
+      if (taskError) throw taskError;
 
-        // Buscar tarefas
-        let { data: fetchedTasks, error: taskError } = await supabase
-          .from("Task")
-          .select("*")
-          .order("order", { ascending: true });
+      const formattedTasks: Task[] = (fetchedTasks || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || undefined,
+        completed: task.completed,
+        priority: task.priority as Priority,
+        dueDate: task.dueDate || undefined,
+        categoryId: task.categoryId || undefined,
+        order: task.order,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        userId: task.userId
+      }));
 
-        if (taskError) throw taskError;
+      setTasks(formattedTasks);
+    } catch (err) {
+      console.error("Erro ao carregar dados do Supabase:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-        if (!fetchedTasks || fetchedTasks.length === 0) {
-          const defaultTasks = getDefaultTasks(formattedCategories);
-          const { data: insertedTasks, error: insertTaskError } = await supabase
-            .from("Task")
-            .insert(defaultTasks.map(t => ({
-              id: t.id,
-              title: t.title,
-              description: t.description || null,
-              completed: t.completed,
-              priority: t.priority,
-              dueDate: t.dueDate || null,
-              categoryId: t.categoryId || null,
-              order: t.order,
-              createdAt: t.createdAt,
-              updatedAt: t.updatedAt
-            })))
-            .select();
+  // Monitorar autenticação e gerenciar sessão inicial
+  useEffect(() => {
+    let isMounted = true;
 
-          if (insertTaskError) throw insertTaskError;
-          fetchedTasks = insertedTasks;
-        }
+    async function initSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
 
-        const formattedTasks: Task[] = (fetchedTasks || []).map(task => ({
-          id: task.id,
-          title: task.title,
-          description: task.description || undefined,
-          completed: task.completed,
-          priority: task.priority as Priority,
-          dueDate: task.dueDate || undefined,
-          categoryId: task.categoryId || undefined,
-          order: task.order,
-          createdAt: task.createdAt,
-          updatedAt: task.updatedAt
-        }));
-
-        setTasks(formattedTasks);
-      } catch (err) {
-        console.error("Erro ao carregar dados do Supabase:", err);
-      } finally {
+      if (session?.user) {
+        setUserId(session.user.id);
+        await loadData(session.user.id);
+      } else {
+        setUserId(null);
+        setTasks([]);
+        setCategories([]);
         setIsLoading(false);
       }
     }
 
-    initData();
-  }, []);
+    initSession();
+
+    // Escutar mudanças no estado de login/logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        if (session?.user) {
+          setUserId(session.user.id);
+          await loadData(session.user.id);
+        }
+      } else if (event === "SIGNED_OUT") {
+        setUserId(null);
+        setTasks([]);
+        setCategories([]);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [loadData]);
 
   const setSearch = useCallback((value: string) => {
     setSearchState(value);
@@ -154,6 +179,7 @@ export function useTodos(): UseTodosReturn {
 
   const addTask = useCallback(
     async (data: Pick<Task, "title" | "priority" | "dueDate" | "categoryId" | "description">) => {
+      if (!userId) return;
       const now = new Date().toISOString();
       const maxOrder = tasks.reduce((max, t) => Math.max(max, t.order), -1);
       const newTask: Task = {
@@ -167,6 +193,7 @@ export function useTodos(): UseTodosReturn {
         order: maxOrder + 1,
         createdAt: now,
         updatedAt: now,
+        userId: userId,
       };
 
       setTasks((prev) => [newTask, ...prev]);
@@ -182,6 +209,7 @@ export function useTodos(): UseTodosReturn {
         order: newTask.order,
         createdAt: newTask.createdAt,
         updatedAt: newTask.updatedAt,
+        userId: newTask.userId,
       });
 
       if (error) {
@@ -189,11 +217,12 @@ export function useTodos(): UseTodosReturn {
         setTasks((prev) => prev.filter((t) => t.id !== newTask.id));
       }
     },
-    [tasks]
+    [tasks, userId]
   );
 
   const toggleTask = useCallback(
     async (id: string) => {
+      if (!userId) return;
       const task = tasks.find((t) => t.id === id);
       if (!task) return;
 
@@ -220,11 +249,12 @@ export function useTodos(): UseTodosReturn {
         );
       }
     },
-    [tasks]
+    [tasks, userId]
   );
 
   const deleteTask = useCallback(
     async (id: string) => {
+      if (!userId) return;
       const task = tasks.find((t) => t.id === id);
       if (!task) return;
 
@@ -236,11 +266,12 @@ export function useTodos(): UseTodosReturn {
         setTasks((prev) => [...prev, task].sort((a, b) => a.order - b.order));
       }
     },
-    [tasks]
+    [tasks, userId]
   );
 
   const updateTask = useCallback(
     async (id: string, updates: Partial<Task>) => {
+      if (!userId) return;
       const task = tasks.find((t) => t.id === id);
       if (!task) return;
 
@@ -275,11 +306,12 @@ export function useTodos(): UseTodosReturn {
         );
       }
     },
-    [tasks]
+    [tasks, userId]
   );
 
   const reorderTasks = useCallback(
     async (reordered: Task[]) => {
+      if (!userId) return;
       setTasks(reordered);
 
       const promises = reordered.map((t, idx) =>
@@ -292,30 +324,38 @@ export function useTodos(): UseTodosReturn {
         console.error("Erro ao reordenar tarefas no Supabase:", errors);
       }
     },
-    []
+    [userId]
   );
 
   const addCategory = useCallback(
     async (name: string, color: string) => {
+      if (!userId) return;
       const newCat: Category = {
         id: generateId(),
         name,
         color,
+        userId: userId,
       };
 
       setCategories((prev) => [...prev, newCat]);
 
-      const { error } = await supabase.from("Category").insert(newCat);
+      const { error } = await supabase.from("Category").insert({
+        id: newCat.id,
+        name: newCat.name,
+        color: newCat.color,
+        userId: newCat.userId,
+      });
       if (error) {
         console.error("Erro ao adicionar categoria no Supabase:", error);
         setCategories((prev) => prev.filter((c) => c.id !== newCat.id));
       }
     },
-    []
+    [userId]
   );
 
   const deleteCategory = useCallback(
     async (id: string) => {
+      if (!userId) return;
       const category = categories.find((c) => c.id === id);
       if (!category) return;
 
@@ -333,7 +373,7 @@ export function useTodos(): UseTodosReturn {
         setTasks(previousTasks);
       }
     },
-    [categories, tasks]
+    [categories, tasks, userId]
   );
 
   return {
@@ -363,52 +403,4 @@ function getDefaultCategories(): Category[] {
     color: cat.color,
     icon: cat.icon || undefined,
   }));
-}
-
-function getDefaultTasks(cats: Category[]): Task[] {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const nextWeek = new Date(now);
-  nextWeek.setDate(nextWeek.getDate() + 7);
-
-  const trabalhoCat = cats.find((c) => c.name === "Trabalho")?.id;
-  const estudosCat = cats.find((c) => c.name === "Estudos")?.id;
-
-  return [
-    {
-      id: generateId(),
-      title: "Revisar documentação do projeto",
-      description: "Verificar a documentação técnica antes da reunião",
-      completed: false,
-      priority: "HIGH",
-      dueDate: tomorrow.toISOString(),
-      order: 0,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-      categoryId: trabalhoCat,
-    },
-    {
-      id: generateId(),
-      title: "Estudar TypeScript avançado",
-      description: "Foco em tipos condicionais e mapped types",
-      completed: false,
-      priority: "MEDIUM",
-      dueDate: nextWeek.toISOString(),
-      order: 1,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-      categoryId: estudosCat,
-    },
-    {
-      id: generateId(),
-      title: "Comprar mantimentos",
-      completed: true,
-      priority: "LOW",
-      dueDate: now.toISOString(),
-      order: 2,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    },
-  ];
 }

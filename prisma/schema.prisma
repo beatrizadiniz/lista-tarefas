@@ -17,6 +17,7 @@ model Task {
   order       Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  userId      String
 
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id])
@@ -27,15 +28,20 @@ model Task {
   @@index([priority])
   @@index([dueDate])
   @@index([categoryId])
+  @@index([userId])
 }
 
 model Category {
   id        String   @id @default(cuid())
-  name      String   @unique
+  name      String
   color     String   // HSL string for custom colors
   icon      String?  // Lucide icon name
   order     Int      @default(0)
+  userId    String
   tasks     Task[]
+
+  @@unique([name, userId])
+  @@index([userId])
 }
 
 model Tag {
